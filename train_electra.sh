@@ -11,5 +11,6 @@ python main.py --model_name_or_path "FPTAI/velectra-base-discriminator-cased" \
                 --num_train_epochs 10 \
                 --logging_steps 100 \
                 --do_eval \
+                --do_train \
                 --use_crf \
                 
