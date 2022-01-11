@@ -1,4 +1,4 @@
-# JointCapPunc: Vietnamese Capitalization and Punctuation Recovery Models
+# JointCapPunc: Joint Capitalization and Punctuation Recovery
 
 - We propose a joint model (namely, JointCapPunc) for capitalization and punctuation recorvering, that based on pretrained language model. 
 - We also introduce the public capitalization and punctuation recovery dataset for Vietnamese.
