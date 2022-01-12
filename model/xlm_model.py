@@ -4,7 +4,6 @@ import logging
 
 import torch
 from torch import nn
-from model.feedforward import FeedforwardLayer
 from torchcrf import CRF
 import torch.nn.functional as F
 from transformers import RobertaPreTrainedModel, XLMRobertaModel
@@ -23,15 +22,15 @@ class ViCapPuncXLMRModel(RobertaPreTrainedModel):
         self.num_cap = args.num_cap
         self.args = args
 
-        self.electra = XLMRobertaModel(config)
-        self.cap_layer = FeedforwardLayer(config.hidden_size , self.num_cap)
+        self.xlm_model = XLMRobertaModel(config)
+        self.cap_layer = nn.Linear(config.hidden_size , self.num_cap)
         if args.use_cap_emb:
-            self.punc_embed_matrix = nn.Parameter(
+            self.cap_embed_matrix = nn.Parameter(
                 torch.rand(self.num_cap, args.cap_emb_dim), requires_grad=True
             )
-            self.punc_layer = FeedforwardLayer(config.hidden_size + args.cap_emb_dim, self.num_punc)
+            self.punc_layer = nn.Linear(config.hidden_size + args.cap_emb_dim, self.num_punc)
         else:
-            self.punc_layer = FeedforwardLayer(config.hidden_size, self.num_punc) 
+            self.punc_layer = nn.Linear(config.hidden_size, self.num_punc) 
 
 
         if args.use_crf:
@@ -49,7 +48,7 @@ class ViCapPuncXLMRModel(RobertaPreTrainedModel):
     ):
 
 
-        outputs = self.electra(input_ids,attention_mask=attention_mask)
+        outputs = self.xlm_model(input_ids,attention_mask=attention_mask)
 
         context_embedding = outputs[0]
 
@@ -75,11 +74,11 @@ class ViCapPuncXLMRModel(RobertaPreTrainedModel):
 
             cap_dis = F.softmax(cap_logits, dim=-1)
 
-            punc_embed_matrix_dup = self.punc_embed_matrix.repeat(cap_dis.size(0), 1, 1)
-            punc_emb = torch.matmul(cap_dis, punc_embed_matrix_dup)
+            cap_embed_matrix_dup = self.cap_embed_matrix.repeat(cap_dis.size(0), 1, 1)
+            cap_emb = torch.matmul(cap_dis, cap_embed_matrix_dup)
 
 
-            input_punc = torch.cat([context_embedding_align, punc_emb],dim = -1)
+            input_punc = torch.cat([context_embedding_align, cap_emb],dim = -1)
         else:
             input_punc = context_embedding_align
 
