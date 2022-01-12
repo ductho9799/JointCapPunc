@@ -22,7 +22,7 @@ class ViCapPuncXLMRModel(RobertaPreTrainedModel):
         self.num_cap = args.num_cap
         self.args = args
 
-        self.xlm_model = XLMRobertaModel(config)
+        self.roberta = XLMRobertaModel(config)
         self.cap_layer = nn.Linear(config.hidden_size , self.num_cap)
         if args.use_cap_emb:
             self.cap_embed_matrix = nn.Parameter(
@@ -48,7 +48,7 @@ class ViCapPuncXLMRModel(RobertaPreTrainedModel):
     ):
 
 
-        outputs = self.xlm_model(input_ids,attention_mask=attention_mask)
+        outputs = self.roberta(input_ids,attention_mask=attention_mask)
 
         context_embedding = outputs[0]
 
