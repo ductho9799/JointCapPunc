@@ -101,7 +101,7 @@ class ViCapPuncElectraModel(ElectraPreTrainedModel):
                 punc_loss = -1 * punc_loss  # negative log-likelihood
 
             else:
-                punc_loss_fct = nn.CrossEntropyLoss(ignore_index=0)
+                punc_loss_fct = nn.CrossEntropyLoss()
                 # Only keep active parts of the loss
                 # attention_mask_label = None
                 if attention_mask_label is not None:
