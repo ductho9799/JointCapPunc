@@ -87,11 +87,17 @@ class ViCapPuncXLMRModel(RobertaPreTrainedModel):
 
         total_loss = 0
         if cap_label is not None:
-
+            
             cap_loss_fct = nn.CrossEntropyLoss()
-            cap_loss = cap_loss_fct(
-                cap_logits.view(-1, self.num_cap), cap_label.view(-1)
-            )
+            if attention_mask_label is not None:
+                active_loss = attention_mask_label.view(-1) == 1
+                active_logits = cap_logits.view(-1, self.num_cap)[active_loss]
+                active_labels = cap_label.view(-1)[active_loss]
+                cap_loss = cap_loss_fct(active_logits, active_labels)
+            else:
+                cap_loss = cap_loss_fct(
+                    cap_logits.view(-1, self.num_cap), cap_label.view(-1)
+                )
             total_loss += self.args.loss_coef * cap_loss
         
         if punc_label is not None:
